@@ -1,0 +1,1 @@
+{"extends":"./tsconfig.json","compilerOptions":{"noEmit":false,"allowImportingTsExtensions":false,"rootDir":"src","outDir":"dist"},"include":["src/server","src/shared"]}
