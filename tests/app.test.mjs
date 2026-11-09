@@ -16,7 +16,7 @@ test('private sessions, wishlist lifecycle and SQLite restore',async t=>{
   db.prepare('INSERT INTO owner VALUES (1,?)').run(await hashPassword(password));
   let time=Date.now();
   const origin='https://example.test';
-  const app=await createApp(db,origin,'https://planner.example.test',undefined,()=>time);
+  const app=await createApp(db,origin,undefined,()=>time);
   t.after(async ()=>{
     await app.close();
     db.close();
@@ -60,4 +60,3 @@ test('private sessions, wishlist lifecycle and SQLite restore',async t=>{
   time+=31*86400000;
   assert.equal((await send('GET',list)).statusCode,401);
 });
-

@@ -8,7 +8,7 @@ export function openDatabase(path: string) {
   try {
     db.exec('PRAGMA busy_timeout=5000; PRAGMA journal_mode=WAL; BEGIN IMMEDIATE');
     const version = Number(db.prepare('PRAGMA user_version').get()?.user_version);
-    if (version > 1) throw new Error('Datenbank wurde mit einer neueren Version erstellt.');
+    if (version > 2) throw new Error('Datenbank wurde mit einer neueren Version erstellt.');
     if (version === 0) db.exec(`
       CREATE TABLE owner (id INTEGER PRIMARY KEY CHECK(id=1), hash TEXT NOT NULL) STRICT;
       CREATE TABLE sessions (token TEXT PRIMARY KEY, expires INTEGER NOT NULL) STRICT;
@@ -18,6 +18,19 @@ export function openDatabase(path: string) {
         createdAt TEXT NOT NULL, updatedAt TEXT NOT NULL
       ) STRICT;
       PRAGMA user_version=1;
+    `);
+    if (version < 2) db.exec(`
+      CREATE TABLE school_config (id INTEGER PRIMARY KEY CHECK(id=1), payload TEXT NOT NULL) STRICT;
+      CREATE TABLE school_tasks (
+        id INTEGER PRIMARY KEY, title TEXT NOT NULL, subject TEXT NOT NULL,
+        priority INTEGER NOT NULL, created_on TEXT NOT NULL, due_on TEXT NOT NULL,
+        completed INTEGER NOT NULL DEFAULT 0
+      ) STRICT;
+      CREATE TABLE school_events (
+        id INTEGER PRIMARY KEY, title TEXT NOT NULL, subject TEXT NOT NULL,
+        event_date TEXT NOT NULL, event_type TEXT NOT NULL, notes TEXT NOT NULL
+      ) STRICT;
+      PRAGMA user_version=2;
     `);
     db.exec('COMMIT');
     return db;

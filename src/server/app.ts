@@ -6,6 +6,8 @@ import type { DatabaseSync } from 'node:sqlite';
 import type { WishInput } from '../shared/wish.js';
 import { tokenDigest, verifyPassword } from './auth.js';
 
+import { registerSchool } from './school.js';
+
 const month = 30 * 86400;
 const schema = {
   type:'object', additionalProperties:false, required:['title'],
@@ -29,7 +31,7 @@ function parseWish(body: Partial<WishInput> & {title:string}): WishInput | null 
   return {title, link, note:body.note?.trim() || null, priceCents:body.priceCents ?? null};
 }
 
-export async function createApp(db: DatabaseSync, origin: string, plannerUrl: string, webRoot?: string, now = Date.now) {
+export async function createApp(db: DatabaseSync, origin: string, webRoot?: string, now = Date.now) {
   const app = Fastify({logger:false, bodyLimit:16384, ajv:{customOptions:{coerceTypes:false,removeAdditional:false}}});
   await app.register(cookie);
   const secure = origin.startsWith('https:');
@@ -87,7 +89,7 @@ export async function createApp(db: DatabaseSync, origin: string, plannerUrl: st
       return reply.setCookie(cookieName,token,{...cookieOptions,maxAge:month}).code(204).send();
     } finally { checking = false; }
   });
-  app.get(base + '/session', async () => ({plannerUrl}));
+  app.get(base + '/session', async () => ({authenticated:true}));
   app.post(base + '/logout', async (request,reply) => {
     const token = request.cookies[cookieName];
     if (token) db.prepare('DELETE FROM sessions WHERE token=?').run(tokenDigest(token));
@@ -116,11 +118,11 @@ export async function createApp(db: DatabaseSync, origin: string, plannerUrl: st
     db.prepare('DELETE FROM wishes WHERE id=?').run(request.params.id);
     return reply.code(204).send();
   });
+  registerSchool(app,db);
   if (webRoot) {
     await app.register(staticFiles,{root:webRoot});
-    app.get('/wunschliste',(_,reply) => reply.sendFile('index.html',{maxAge:0}));
+    for (const route of ['/wunschliste','/schulplaner']) app.get(route,(_,reply) => reply.sendFile('index.html',{maxAge:0}));
   }
   app.setNotFoundHandler((_request,reply) => reply.code(404).send({message:'Seite nicht gefunden.'}));
   return app;
 }
-

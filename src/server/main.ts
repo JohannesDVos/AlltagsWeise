@@ -1,4 +1,6 @@
 import { fileURLToPath } from 'node:url';
+import { readFileSync, statSync } from 'node:fs';
+import { importSchool } from './school.js';
 import { backup } from 'node:sqlite';
 import { createInterface } from 'node:readline/promises';
 import { Writable } from 'node:stream';
@@ -28,13 +30,21 @@ async function main() {
       } finally { terminal.close(); }
       return;
     }
+    if (command === 'import-school' && destination) {
+      if (statSync(destination).size > 32 * 1024 * 1024) throw new Error('Die Importdatei ist zu groß.');
+      let data:unknown;
+      try { data = JSON.parse(readFileSync(destination,'utf8').replace(/^\uFEFF/,'')); }
+      catch { throw new Error('Die Importdatei ist kein lesbarer JSON-Export.'); }
+      const count = importSchool(db,data);
+      console.log(`${count.tasks} Aufgaben und ${count.events} Termine importiert.`);
+      return;
+    }
     if (command === 'migrate') return;
     if (command === 'backup' && destination) { await backup(db,destination); return; }
     if (command) throw new Error('Unbekannter Befehl.');
     const origin = new URL(process.env.APP_ORIGIN ?? 'http://localhost:3000');
-    const planner = process.env.PLANNER_URL ? new URL(process.env.PLANNER_URL) : null;
-    if ((origin.protocol !== 'https:' && !(origin.protocol === 'http:' && ['localhost','127.0.0.1'].includes(origin.hostname))) || (planner && planner.protocol !== 'https:')) throw new Error('Ungültige URL-Konfiguration.');
-    const app = await createApp(db,origin.origin,planner?.href ?? '',fileURLToPath(new URL('../web/',import.meta.url)));
+    if ((origin.protocol !== 'https:' && !(origin.protocol === 'http:' && ['localhost','127.0.0.1'].includes(origin.hostname)))) throw new Error('Ungültige URL-Konfiguration.');
+    const app = await createApp(db,origin.origin,fileURLToPath(new URL('../web/',import.meta.url)));
     await app.listen({host:'127.0.0.1',port:Number(process.env.PORT ?? 3000)});
     console.log('AlltagsWeise läuft auf localhost.');
     await new Promise<void>(resolve => {
