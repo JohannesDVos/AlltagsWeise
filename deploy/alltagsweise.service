@@ -1,0 +1,23 @@
+[Unit]
+Description=AlltagsWeise
+After=network.target
+
+[Service]
+Type=simple
+User=alltagsweise
+Group=alltagsweise
+WorkingDirectory=/opt/alltagsweise/current
+EnvironmentFile=/etc/alltagsweise.env
+ExecStart=/usr/bin/node dist/server/main.js
+Restart=on-failure
+RestartSec=3
+StateDirectory=alltagsweise
+StateDirectoryMode=0700
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

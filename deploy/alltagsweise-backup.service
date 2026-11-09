@@ -1,0 +1,17 @@
+[Unit]
+Description=AlltagsWeise SQLite-Sicherung
+
+[Service]
+Type=oneshot
+User=alltagsweise
+Group=alltagsweise
+EnvironmentFile=/etc/alltagsweise.env
+WorkingDirectory=/opt/alltagsweise/current
+ExecStart=/bin/bash deploy/backup.sh
+StateDirectory=alltagsweise
+StateDirectoryMode=0700
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true

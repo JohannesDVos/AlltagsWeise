@@ -1,0 +1,9 @@
+[Unit]
+Description=Tägliche Sicherung für AlltagsWeise
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+
+[Install]
+WantedBy=timers.target
