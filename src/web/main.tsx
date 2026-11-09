@@ -5,6 +5,8 @@ import { api, ApiError, messageFor } from './api.js';
 import { modules } from './modules.js';
 import { Wishlist } from './wishlist.js';
 import { School } from './school.js';
+import { Todos } from './todos.js';
+import { Routines } from './routines.js';
 import './style.css';
 
 type Session = {authenticated:boolean};
@@ -55,9 +57,13 @@ function App() {
     </a>)}</nav><button disabled={busy} onClick={()=>void logout()}>Abmelden</button></aside>
     <main id="inhalt" tabIndex={-1}>
       {error && <p className="error" role="alert">{error}</p>}
-      {current==='/wunschliste' ? <Wishlist onExpired={expired}/> : current==="/schulplaner" ? <School onExpired={expired}/> : <>
+      {current==='/wunschliste' && <Wishlist onExpired={expired}/>}
+      {current==='/schulplaner' && <School onExpired={expired}/>}
+      {current==='/todos' && <Todos onExpired={expired}/>}
+      {current==='/routinen' && <Routines onExpired={expired}/>}
+      {current==='/' && <>
         <header className="intro"><p className="eyebrow">Dein Alltag, an einem Ort</p><h1>Übersicht</h1><p>Wähle ein Werkzeug und leg los.</p></header>
-        <div className="tiles">{tools.filter(tool=>tool.id!=='home').map(tool=><a className="panel tile" key={tool.id} href={tool.href}>
+        <div className="tiles dashboard-tiles">{tools.filter(tool=>tool.id!=='home').map(tool=><a className="panel tile" key={tool.id} href={tool.href}>
           <span className="symbol" aria-hidden="true">{tool.symbol}</span><h2>{tool.name}</h2><p>{tool.description}</p>
         </a>)}</div>
       </>}
