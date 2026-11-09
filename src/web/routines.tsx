@@ -17,6 +17,7 @@ export function Routines({onExpired}:{onExpired:()=>void}) {
   const [rhythm,setRhythm]=useState<Rhythm>('daily');
   const [editing,setEditing]=useState<Routine>();
   const [archiving,setArchiving]=useState<string>();
+  const [deleting,setDeleting]=useState<string>();
   const [formKey,setFormKey]=useState(0);
   function reset() {setEditing(undefined);setRhythm('daily');setFormKey(key=>key+1);}
   function save(event:FormEvent<HTMLFormElement>) {
@@ -45,6 +46,16 @@ export function Routines({onExpired}:{onExpired:()=>void}) {
         })}>Archivierung bestätigen</button>
         <button disabled={busy} onClick={()=>setArchiving(undefined)}>Abbrechen</button>
       </div></div>}
+      {routine.archivedOn && deleting!==routine.id && <div className="actions">
+        <button className="danger" disabled={busy} onClick={()=>setDeleting(routine.id)}>Löschen</button>
+      </div>}
+      {routine.archivedOn && deleting===routine.id && <div className="confirm">
+        <p>„{routine.title}“ und alle erledigten Termine endgültig löschen?</p>
+        <div className="actions">
+          <button className="danger" disabled={busy} onClick={()=>void change(url,'DELETE',undefined,'Routine gelöscht.',()=>setDeleting(undefined))}>Endgültig löschen</button>
+          <button disabled={busy} onClick={()=>setDeleting(undefined)}>Abbrechen</button>
+        </div>
+      </div>}
       {routine.completions.length>0 && <details><summary>Erledigte Termine ({routine.completions.length})</summary>
         <ul>{routine.completions.slice().reverse().map(date=><li key={date}><time dateTime={date}>{formatDay(date)}</time></li>)}</ul>
       </details>}

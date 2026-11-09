@@ -104,6 +104,24 @@ export function registerPersonal(app:FastifyInstance, db:DatabaseSync, now:()=>n
   app.post<{Params:WithId}>(routines+'/:id/archive',async (request,reply)=>
     saved(reply,db.prepare('UPDATE routines SET archivedOn=COALESCE(archivedOn,?) WHERE id=?')
       .run(today(),request.params.id).changes));
+  app.delete<{Params:WithId}>(routines+'/:id',async (request,reply)=>{
+    const {id}=request.params;
+    const routine=readRoutine.get(id);
+    if (!routine) return missing(reply);
+    if (!routine.archivedOn) return reply.code(409).send({message:'Archiviere die Routine vor dem Löschen.'});
+
+    db.exec('BEGIN IMMEDIATE');
+    let changes:number|bigint;
+    try {
+      db.prepare('DELETE FROM routine_completions WHERE routineId=?').run(id);
+      changes=db.prepare('DELETE FROM routines WHERE id=?').run(id).changes;
+      db.exec('COMMIT');
+    } catch(error) {
+      db.exec('ROLLBACK');
+      throw error;
+    }
+    return saved(reply,changes);
+  });
   app.put<{Body:{completed:boolean;dueOn:string};Params:WithId}>(routines+'/:id/completion',{schema:completionSchema},async (request,reply)=>{
     const row=readRoutine.get(request.params.id) as unknown as RoutineRow | undefined;
     if (!row) return missing(reply);

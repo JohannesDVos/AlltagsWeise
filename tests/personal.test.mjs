@@ -99,8 +99,14 @@ test('signed-in owner manages todos and can only complete the active routine dat
   assert.equal(archived.title,'Weiterlesen');
   assert.equal(archived.nextDueOn,null);
   assert.deepEqual(archived.completions,['2026-11-09','2026-11-10']);
+  assert.equal((await app.inject({method:'DELETE',url:'/api/v1'+routine,headers:{origin}})).statusCode,401);
+  assert.equal((await call('DELETE',routine)).statusCode,204);
+  assert.equal(await read(),undefined);
+  assert.equal(db.prepare('SELECT count(*) AS total FROM routine_completions WHERE routineId=?').get(added.json().id).total,0);
+  assert.equal((await call('DELETE',routine)).statusCode,404);
 
   const weekly=await call('POST','/routines',{title:'Montags',rhythm:'weekly',day:1});
   assert.equal(weekly.statusCode,201);
+  assert.equal((await call('DELETE','/routines/'+weekly.json().id)).statusCode,409);
   assert.equal((await call('PUT','/routines/'+weekly.json().id+'/completion',{dueOn:'2026-11-12',completed:true})).statusCode,409);
 });
