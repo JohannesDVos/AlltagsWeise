@@ -1,8 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <title>AlltagsWeise</title>
   <rect width="64" height="64" rx="16" fill="#075953"/>
-  <path d="M15 17a1 1 0 0 1 1.5-.86L25 21a23 23 0 0 1 14 0l8.5-4.86A1 1 0 0 1 49 17v17c0 10-7.6 17-17 17s-17-7-17-17Z" fill="#F5F8F3"/>
-  <circle cx="25" cy="31" r="3.25" fill="#075953"/>
-  <circle cx="39" cy="31" r="3.25" fill="#075953"/>
-  <path d="M28.5 38h7L32 43Z" fill="#C28C35"/>
+  <path d="M32 12c-12 0-20 9-20 22 0 12 8 20 20 20s20-8 20-20c0-13-8-22-20-22Z" fill="#A8CFC3"/>
+  <circle cx="23" cy="28" r="11" fill="#F5F8F3"/>
+  <circle cx="41" cy="28" r="11" fill="#F5F8F3"/>
+  <circle cx="24" cy="28" r="4.5" fill="#075953"/>
+  <circle cx="40" cy="28" r="4.5" fill="#075953"/>
+  <path d="m28 36 4 6 4-6Z" fill="#C28C35"/>
+  <path d="M16 39c1 5 3 8 7 10M48 39c-1 5-3 8-7 10" fill="none" stroke="#075953" stroke-width="2.5" stroke-linecap="round"/>
 </svg>
