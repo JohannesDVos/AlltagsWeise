@@ -7,6 +7,7 @@ import type { WishInput } from '../shared/wish.js';
 import { tokenDigest, verifyPassword } from './auth.js';
 
 import { registerSchool } from './school.js';
+import { registerPersonal } from './personal.js';
 
 const month = 30 * 86400;
 const schema = {
@@ -119,9 +120,12 @@ export async function createApp(db: DatabaseSync, origin: string, webRoot?: stri
     return reply.code(204).send();
   });
   registerSchool(app,db);
+  registerPersonal(app,db,now);
   if (webRoot) {
     await app.register(staticFiles,{root:webRoot});
-    for (const route of ['/wunschliste','/schulplaner']) app.get(route,(_,reply) => reply.sendFile('index.html',{maxAge:0}));
+    for (const route of ['/wunschliste','/schulplaner','/todos','/routinen']) {
+      app.get(route,(_,reply) => reply.sendFile('index.html',{maxAge:0}));
+    }
   }
   app.setNotFoundHandler((_request,reply) => reply.code(404).send({message:'Seite nicht gefunden.'}));
   return app;
