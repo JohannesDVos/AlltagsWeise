@@ -4,9 +4,10 @@ import { createRoot } from 'react-dom/client';
 import { api, ApiError, messageFor } from './api.js';
 import { modules } from './modules.js';
 import { Wishlist } from './wishlist.js';
+import { School } from './school.js';
 import './style.css';
 
-type Session = {plannerUrl:string};
+type Session = {authenticated:boolean};
 function App() {
   const [session,setSession] = useState<Session|null>();
   const [error,setError] = useState('');
@@ -45,19 +46,19 @@ function App() {
     </form> : error ? <button onClick={()=>location.reload()}>Erneut laden</button> : <p role="status">AlltagsWeise wird geladen.</p>}
     {error && <p className="error" role="alert">{error}</p>}
   </div></main>;
-  const tools=modules(session.plannerUrl);
+  const tools=modules;
   const current=location.pathname;
   return <div className="layout">
     <a className="skip" href="#inhalt">Zum Inhalt</a>
-    <aside>{brand}<nav aria-label="Werkzeuge">{tools.map(tool=><a key={tool.id} href={tool.href} aria-current={!tool.external && current===tool.href?'page':undefined}>
-      <span aria-hidden="true">{tool.symbol}</span>{tool.name}{tool.external && <span aria-hidden="true">↗</span>}
+    <aside>{brand}<nav aria-label="Werkzeuge">{tools.map(tool=><a key={tool.id} href={tool.href} aria-current={current===tool.href?'page':undefined}>
+      <span aria-hidden="true">{tool.symbol}</span>{tool.name}
     </a>)}</nav><button disabled={busy} onClick={()=>void logout()}>Abmelden</button></aside>
     <main id="inhalt" tabIndex={-1}>
       {error && <p className="error" role="alert">{error}</p>}
-      {current==='/wunschliste' ? <Wishlist onExpired={expired}/> : <>
+      {current==='/wunschliste' ? <Wishlist onExpired={expired}/> : current==="/schulplaner" ? <School onExpired={expired}/> : <>
         <header className="intro"><p className="eyebrow">Dein Alltag, an einem Ort</p><h1>Übersicht</h1><p>Wähle ein Werkzeug und leg los.</p></header>
         <div className="tiles">{tools.filter(tool=>tool.id!=='home').map(tool=><a className="panel tile" key={tool.id} href={tool.href}>
-          <span className="symbol" aria-hidden="true">{tool.symbol}</span><h2>{tool.name}{tool.external?' ↗':''}</h2><p>{tool.description}</p>
+          <span className="symbol" aria-hidden="true">{tool.symbol}</span><h2>{tool.name}</h2><p>{tool.description}</p>
         </a>)}</div>
       </>}
     </main>
