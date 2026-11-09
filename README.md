@@ -1,6 +1,6 @@
 # AlltagsWeise
 
-Eine selbst gehostete Werkzeugzentrale mit privater Wunschliste. Die Oberfläche ist auf Deutsch und für Safari, Firefox und Chromium ausgelegt. Im Browser kann die Seite zum Home-Bildschirm hinzugefügt werden.
+Eine selbst gehostete Werkzeugzentrale mit privater Wunschliste und Schulplaner. Die Oberfläche ist auf Deutsch und für Safari, Firefox und Chromium ausgelegt. Im Browser kann die Seite zum Home-Bildschirm hinzugefügt werden.
 
 ## Lokal starten
 
@@ -19,10 +19,24 @@ Dann [localhost öffnen](http://localhost:3000). Lokal wird die SQLite-Datei unt
 
 1. Mit `uname -m`, `cat /etc/os-release`, `node -v`, `sudo nginx -T` und `sudo ss -ltnp` Architektur, Betriebssystem, Node, Hauptdomain, Zertifikatspfade und Port 3000 prüfen. Raspberry Pi OS mit 64 Bit und Node 24 ab 24.15 unter `/usr/bin/node` verwenden. Vor der Änderung die vorhandene NGINX-Konfiguration und betroffene Dienste sichern.
 2. Ein normales Administratorkonto klont das Repo in seinen eigenen Checkout. Bei privatem Repo einen geeigneten GitHub-Zugang auf dem Pi einrichten. `npm ci && npm run check` im Checkout ausführen. Dateien des geprüften Commits in ein eigenes Release-Verzeichnis unter `/opt/alltagsweise/releases` übernehmen und den Ordner `dist` aus dem geprüften Build mitkopieren. Im Release `npm ci --omit=dev` ausführen. `/opt/alltagsweise/current` als Symlink auf dieses Release anlegen. Das Deployment-Konto braucht Schreibrechte im Release-Verzeichnis und für den Symlink. Das Dienstkonto braucht dort nur Leserechte.
-3. Systemkonto `alltagsweise` ohne Login anlegen und `/var/lib/alltagsweise` mit Eigentümer `alltagsweise:alltagsweise` und Modus 0700 erstellen. Als root `/etc/alltagsweise.env` mit Modus 0600 anlegen. Dort `APP_ORIGIN` auf die HTTPS-Hauptadresse setzen, `PLANNER_URL` auf die HTTPS-Adresse des bestehenden Planers, `PORT=3000` und `DATABASE_PATH=/var/lib/alltagsweise/app.sqlite` setzen. Die Beispielwerte im Repository sind fiktiv.
+3. Systemkonto `alltagsweise` ohne Login anlegen und `/var/lib/alltagsweise` mit Eigentümer `alltagsweise:alltagsweise` und Modus 0700 erstellen. Als root `/etc/alltagsweise.env` mit Modus 0600 anlegen. Dort `APP_ORIGIN` auf die HTTPS-Hauptadresse setzen, `PORT=3000` und `DATABASE_PATH=/var/lib/alltagsweise/app.sqlite` setzen. Die Beispielwerte im Repository sind fiktiv.
 4. Im Release einmalig das Passwort einrichten, beispielsweise mit `sudo -u alltagsweise env DATABASE_PATH=/var/lib/alltagsweise/app.sqlite /usr/bin/node dist/server/main.js setup`. Das Passwort wird verdeckt eingegeben.
 5. Die beiden Service-Dateien und den Timer aus `deploy/` nach `/etc/systemd/system/` installieren. Mit `sudo systemctl daemon-reload` neu laden und mit `sudo systemctl enable --now alltagsweise.service alltagsweise-backup.timer` aktivieren. Mit `curl -fsS http://127.0.0.1:3000/health` prüfen.
 6. `deploy/nginx-location.conf` im vorhandenen HTTPS-Serverblock der Hauptdomain einbinden oder damit dessen bisherige `location /` ersetzen. Die Planer-Subdomain separat belassen. `sudo nginx -t` ausführen, anschließend NGINX neu laden und beide Adressen im Browser prüfen.
+
+## Schulplaner und Datenübernahme
+
+Der Schulplaner ist nach der AlltagsWeise-Anmeldung unter `/schulplaner` verfügbar. In den Einstellungen kannst du Fächer, Unterrichtstage, Zeiten und Unterrichtsstunden konfigurieren und die Planerdaten als JSON herunterladen. Auf Basis des Stundenplans schlägt die Aufgabenmaske einen Fälligkeitstermin vor.
+
+Für die einmalige Übernahme bestehender Daten lade nach Anmeldung im alten HausaufgabenPlaner dessen JSON-Export unter `/api/export` herunter. Sichere zuerst die AlltagsWeise-Datenbank. Führe dann im AlltagsWeise-Projektordner nach dem Build folgenden Befehl mit dem Pfad zur Exportdatei aus:
+
+```sh
+npm start -- import-school /privater/pfad/export.json
+```
+
+Auf dem Raspberry Pi setze `DATABASE_PATH=/var/lib/alltagsweise/app.sqlite` beim Aufruf von `/usr/bin/node /opt/alltagsweise/current/dist/server/main.js import-school /privater/pfad/export.json` als Dienstkonto `alltagsweise`. Die private Exportdatei muss für dieses Konto lesbar sein. Stoppe den App-Dienst für die Übernahme und starte ihn danach erneut.
+
+Der Import übernimmt Aufgaben einschließlich Erledigt-Status, Termine, Fächer und Stundenplan gemeinsam in einen leeren Schulplaner. Die alte Anwendung und die Wunschliste bleiben bei der Übernahme unberührt. Die Exportdatei enthält persönliche Daten und gehört außerhalb des Git-Checkouts.
 
 ## Updates und Wiederherstellung
 
