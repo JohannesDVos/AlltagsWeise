@@ -1,1 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="46" fill="#075953"/><path d="m43 129 36-68 36 68m-55-25h38m19-36 14 58 19-40 17 40" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>AlltagsWeise</title>
+  <rect width="64" height="64" rx="16" fill="#075953"/>
+  <path d="M15 17a1 1 0 0 1 1.5-.86L25 21a23 23 0 0 1 14 0l8.5-4.86A1 1 0 0 1 49 17v17c0 10-7.6 17-17 17s-17-7-17-17Z" fill="#F5F8F3"/>
+  <circle cx="25" cy="31" r="3.25" fill="#075953"/>
+  <circle cx="39" cy="31" r="3.25" fill="#075953"/>
+  <path d="M28.5 38h7L32 43Z" fill="#C28C35"/>
+</svg>
