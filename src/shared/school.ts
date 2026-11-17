@@ -28,7 +28,7 @@ export function nextLesson(timetable:Timetable,subject:string,from:string) {
   const parsed = new Date(from+'T00:00:00Z');
   if (!/^[1-9]\d{3}-\d{2}-\d{2}$/.test(from) || !Number.isFinite(parsed.getTime()) || parsed.toISOString().slice(0,10)!==from) return '';
   const days = new Set(timetable.lessons.filter(lesson=>lesson.subject_id===subject).map(lesson=>lesson.day));
-  for(let offset=0;offset<7;offset++) {
+  for(let offset=1;offset<=7;offset++) {
     const date=addDays(from,offset);
     if (date.length!==10 || date.startsWith('+')) return '';
     const weekday=weekdays[(new Date(date+'T00:00:00Z').getUTCDay()+6)%7];

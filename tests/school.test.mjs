@@ -20,6 +20,22 @@ const config={
 const task={title:'Übung 4',subject:'math',priority:3,created_on:'2026-11-06',due_on:'2026-11-09'};
 const appointment={title:'Klassenarbeit',subject:'math',event_date:'2026-11-09',event_type:'Arbeit',notes:'Lineal mitbringen'};
 
+test('suggests the next English lesson after the assignment date',()=>{
+  const timetable={
+    weekdays:['Tue','Fri'],
+    periods:config.timetable.periods,
+    lessons:[
+      {day:'Tue',slot:1,subject_id:'english',room:'A1'},
+      {day:'Fri',slot:1,subject_id:'english',room:'A1'}
+    ]
+  };
+  assert.equal(nextLesson(timetable,'english','2026-11-17'),'2026-11-20');
+});
+
+test('suggests the following week for a subject taught once a week',()=>{
+  assert.equal(nextLesson(config.timetable,'math','2026-11-09'),'2026-11-16');
+});
+
 test('migrates existing wishes and imports legacy records transactionally',()=>{
   const dir=mkdtempSync(join(tmpdir(),'alltagsweise-school-'));
   const file=join(dir,'old.sqlite');
